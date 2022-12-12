@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: profilingtest-service
+  namespace: profiling
+  labels:
+    app: profilingtest-service
+spec:
+  selector:
+    app: profilingtest-service
+  ports:
+    - protocol: TCP
+      port: 9999
+      targetPort: 9999
+      nodePort: 30001
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: profilingtest-service
+  namespace: profiling
+  labels:
+    app: profilingtest-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: profilingtest-service
+  template:
+    metadata:
+      labels:
+        app: profilingtest-service
+    spec:
+      containers:
+        - name: profilingtest-service
+          image: mp.beginroad.cn/profilingtest:v0.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SERVICE_NAME
+              value: "profilingtest"
+          ports:
+            - containerPort: 9999
+              protocol: TCP
+      restartPolicy: Always
+

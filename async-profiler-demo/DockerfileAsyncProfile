@@ -1,0 +1,26 @@
+FROM jdk:8u251
+
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN echo 'Asia/Shanghai' >/etc/timezone
+
+ENV jar profilingtest-1.0.jar
+ENV workdir /data/app/
+ENV profiler /usr/local/async-profiler/
+
+# Async Profiler
+RUN mkdir ${profiler}
+COPY collect.sh ${profiler}
+RUN chmod +x ${profiler}/collect.shasync-profiler-2.8.3-linux-x64.tar.gz
+COPY async-profiler-2.8.3-linux-x64.tar.gz ${profiler}/async-profiler.tar.gz
+RUN cd ${profiler} && tar -xvzf ${profiler}/async-profiler.tar.gz && \
+      mv ${profiler}/async-profiler-2.8.3-linux-x64/* ${profiler} && \
+      rm -r  ${profiler}/async-profiler-2.8.3-linux-x64 && \
+      rm -f ${profiler}/async-profiler.tar.gz
+
+RUN mkdir -p ${workdir}g
+COPY ${jar} ${workdir}
+COPY start.sh ${workdir}
+RUN chmod +x ${workdir}start.sh
+
+WORKDIR ${workdir}
+CMD ["bash", "-ec", "${workdir}start.sh"]
