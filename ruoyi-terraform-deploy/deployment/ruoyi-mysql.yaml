@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  namespace: ruoyi
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  labels:
+    prod: mysql
+  namespace: ruoyi
+spec:
+  ports:
+    - port: 3306
+  selector:
+    prod: mysql
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ruoyi-mysql
+  namespace: ruoyi
+  labels:
+    prod: mysql
+spec:
+  selector:
+    matchLabels:
+      prod: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        prod: mysql
+    spec:
+      containers:
+        - image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-mysql:v1.1
+          name: ruoyi-mysql
+          env:
+            # 在实际中使用 secret
+            - name: MYSQL_ROOT_PASSWORD
+              value: password
+          ports:
+            - containerPort: 3306
+              name: ruoyi-mysql
+          volumeMounts:
+            - name: mysql-persistent-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pv-claim

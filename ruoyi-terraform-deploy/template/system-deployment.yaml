@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: system-service
+  namespace: ruoyi
+spec:
+  selector:
+    app: system-pod
+  ports:
+    - protocol: TCP
+      port: 9201
+      targetPort: 9201
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: system-deployment
+  namespace: ruoyi
+  labels:
+    app: system-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: system-pod
+  template:
+    metadata:
+      labels:
+        app: system-pod
+      annotations:
+        admission.datakit/java-lib.version: ""
+    spec:
+      containers:
+      - name: system-container
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: DD_AGENT_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: JAVA_OPTS
+          value: |-
+            -javaagent:/datadog-lib/dd-java-agent.jar -Ddd.service=$PREFIX-system  -Ddd.profiling.enabled=true  -Ddd.tags=container_host:\$(PODE_NAME) -Ddd.service.mapping=mysql:$PREFIX-mysql,redis:$PREFIX-redis -Ddd.env=$ENV -Ddd.agent.port=9529
+        - name: PARAMS
+          value: "--spring.redis.host=\$(REDIS_SERVICE_SERVICE_HOST) --spring.nacos.ip=\$(NACOS_SERVICE_SERVICE_HOST) --spring.db.ip=\$(MYSQL_SERVICE_SERVICE_HOST)"
+        image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-system-service:v1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9201
+          protocol: TCP
+        volumeMounts:
+        - name: varlog
+          mountPath: /data/app/logs/ruoyi-system
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            memory: 256Mi
+      - name: logfwd
+        image: pubrepo.jiagouyun.com/datakit/logfwd:1.4.5
+        env:
+        - name: LOGFWD_DATAKIT_HOST
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        - name: LOGFWD_DATAKIT_PORT
+          value: "9531"
+        - name: LOGFWD_ANNOTATION_DATAKIT_LOGS
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.annotations['datakit/log']
+        - name: LOGFWD_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: LOGFWD_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - mountPath: /var/log
+          name: varlog
+        - mountPath: /opt/logfwd/config
+          name: logfwd-config
+          subPath: config
+      restartPolicy: Always
+      volumes:
+      - name: varlog
+        emptyDir: {}
+      - configMap:
+          name: logfwd-conf
+        name: logfwd-config
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logfwd-conf
+  namespace: ruoyi
+data:
+  config: |
+    [
+        {            
+            "loggings": [
+                {
+                    "logfiles": ["/var/log/info.log","/var/log/error.log"],
+                    "source": "$LOG_SOURCE",
+                    "multiline_match": "^\\\\d{4}-\\\\d{2}-\\\\d{2}"
+                }
+            ]
+        }
+    ]
+      
+

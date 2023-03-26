@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    prod: nacos
+  name: ruoyi-nacos
+  namespace: ruoyi
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  serviceName: ruoyi-nacos
+  selector:
+    matchLabels:
+      prod: nacos
+  template:
+    metadata:
+      labels:
+        prod: nacos
+    spec:
+      containers:
+        - env:
+            - name: NACOS_SERVER_PORT
+              value: "8848"
+            - name: NACOS_APPLICATION_PORT
+              value: "8848"
+            - name: PREFER_HOST_MODE
+              value: hostname
+            - name: MODE
+              value: standalone
+            - name: EMBEDDED_STORAGE
+              value: embedded
+          image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-nacos:v1.0
+          imagePullPolicy: IfNotPresent
+          name: nacos
+          ports:
+            - containerPort: 8848
+              name: http
+              protocol: TCP
+            - containerPort: 9848
+              name: client-rpc
+              protocol: TCP
+            - containerPort: 9849
+              name: raft-rpc
+              protocol: TCP
+            - containerPort: 7848
+              name: old-raft-rpc
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /home/nacos/plugins/peer-finder
+              name: data
+              subPath: peer-finder
+            - mountPath: /home/nacos/data
+              name: data
+              subPath: data
+            - mountPath: /home/nacos/logs
+              name: data
+              subPath: logs
+      volumes:
+        - emptyDir: {}
+          name: data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    prod: nacos
+  name: nacos-service
+  namespace: ruoyi
+spec:
+  ports:
+    - name: http
+      port: 8848
+      protocol: TCP
+      targetPort: 8848
+    - name: client-rpc
+      port: 9848
+      protocol: TCP
+      targetPort: 9848
+    - name: raft-rpc
+      port: 9849
+      protocol: TCP
+      targetPort: 9849
+    - name: old-raft-rpc
+      port: 7848
+      protocol: TCP
+      targetPort: 7848
+  selector:
+    prod: nacos
+  type: NodePort

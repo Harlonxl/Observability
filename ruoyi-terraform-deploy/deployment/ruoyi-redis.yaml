@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ruoyi-redis
+  labels:
+    prod: redis
+  namespace: ruoyi
+spec:
+  selector:
+    matchLabels:
+      prod: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        prod: redis
+    spec:
+      containers:
+        - name: prod-redis
+          ports:
+            - containerPort: 6379
+          image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-redis:v1.0
+          imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: ruoyi
+  labels:
+    prod: redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379     # 容器端口
+  selector:
+    prod: redis

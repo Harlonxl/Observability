@@ -1,0 +1,12 @@
+FROM openjdk:8u292
+MAINTAINER Harlon
+
+RUN /bin/cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN echo 'Asia/Shanghai' >/etc/timezone
+
+ENV jar ruoyi-auth.jar
+ENV workdir /data/app/
+RUN mkdir -p ${workdir}
+COPY ${jar} ${workdir}
+WORKDIR ${workdir}
+ENTRYPOINT ["sh", "-ec", "exec java ${JAVA_OPTS} -jar ${jar} ${PARAMS} 2>&1 > /dev/null"]
