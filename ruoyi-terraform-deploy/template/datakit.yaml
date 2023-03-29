@@ -282,7 +282,7 @@ data:
       # ignore_resources = []
       customer_tags = ["node_ip"]
       [inputs.ddtrace.close_resource]
-        "*" = ["PUT /nacos/*","GET /nacos/*","POST /nacos/*"]
+        "*" = ["PUT /nacos/*","GET /nacos/*","POST /nacos/*", "/rum/*"]
       ## tags is ddtrace configed key value pairs
       # [inputs.ddtrace.tags]
         # some_tag = "some_value"

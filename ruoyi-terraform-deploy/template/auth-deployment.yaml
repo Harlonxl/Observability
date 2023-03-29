@@ -51,7 +51,7 @@ spec:
                 fieldPath: status.hostIP
           - name: JAVA_OPTS
             value: |-
-              -javaagent:/datadog-lib/dd-java-agent.jar -Ddd.service=$PREFIX-auth  -Ddd.profiling.enabled=true  -Ddd.tags=container_host:\$(POD_NAME) -Ddd.service.mapping=mysql:$PREFIX-mysql,redis:$PREFIX-redis -Ddd.env=$ENV -Ddd.agent.port=9529
+              -javaagent:/datadog-lib/dd-java-agent.jar -Ddd.service=$PREFIX-auth  -Ddd.profiling.enabled=true -Ddd.profiling.allocation.enabled=true -Ddd.tags=container_host:\$(POD_NAME) -Ddd.service.mapping=mysql:$PREFIX-mysql,redis:$PREFIX-redis -Ddd.env=$ENV -Ddd.agent.port=9529
           - name: PARAMS
             value: "--spring.redis.host=\$(REDIS_SERVICE_SERVICE_HOST) --spring.nacos.ip=\$(NACOS_SERVICE_SERVICE_HOST)"
           image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-auth-service:v1.0
