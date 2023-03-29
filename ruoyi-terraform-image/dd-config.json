@@ -1,0 +1,7 @@
+{
+  "environment": "$ENV",
+  "service": "$PREFIX-nginx",
+  "agent_host": "datakit-service.datakit",
+  "operation_name_override": "nginx.handle",
+  "agent_port": 9529
+}
