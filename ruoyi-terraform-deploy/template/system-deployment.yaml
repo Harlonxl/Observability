@@ -54,71 +54,17 @@ spec:
         - containerPort: 9201
           protocol: TCP
         volumeMounts:
-        - name: varlog
-          mountPath: /data/app/logs/ruoyi-system
+        - name: system-log
+          mountPath: /data/app/logs
         resources:
           limits:
             memory: 512Mi
           requests:
             memory: 256Mi
-      - name: logfwd
-        image: pubrepo.jiagouyun.com/datakit/logfwd:1.4.5
-        env:
-        - name: LOGFWD_DATAKIT_HOST
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: status.hostIP
-        - name: LOGFWD_DATAKIT_PORT
-          value: "9531"
-        - name: LOGFWD_ANNOTATION_DATAKIT_LOGS
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.annotations['datakit/log']
-        - name: LOGFWD_POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: LOGFWD_POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        volumeMounts:
-        - mountPath: /var/log
-          name: varlog
-        - mountPath: /opt/logfwd/config
-          name: logfwd-config
-          subPath: config
+
       restartPolicy: Always
       volumes:
-      - name: varlog
-        emptyDir: {}
-      - configMap:
-          name: logfwd-conf
-        name: logfwd-config
-
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: logfwd-conf
-  namespace: ruoyi
-data:
-  config: |
-    [
-        {            
-            "loggings": [
-                {
-                    "logfiles": ["/var/log/info.log","/var/log/error.log"],
-                    "source": "$LOG_SOURCE",
-                    "multiline_match": "^\\\\d{4}-\\\\d{2}-\\\\d{2}"
-                }
-            ]
-        }
-    ]
-      
-
+        - name: system-log
+          hostPath:
+            path: /data/logs
+            type: DirectoryOrCreate

@@ -16,7 +16,7 @@ spec:
         prod: redis
     spec:
       containers:
-        - name: prod-redis
+        - name: ruoyi-redis
           ports:
             - containerPort: 6379
           image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-redis:v1.0

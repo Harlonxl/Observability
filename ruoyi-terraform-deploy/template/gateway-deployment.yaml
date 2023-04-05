@@ -61,47 +61,12 @@ spec:
           - containerPort: 9299
             protocol: TCP
           volumeMounts:
-          - name: varlog
-            mountPath: /data/app/logs/ruoyi-gateway
-        - name: logfwd
-          image: pubrepo.jiagouyun.com/datakit/logfwd:1.4.5
-          env:
-            - name: LOGFWD_DATAKIT_HOST
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.hostIP
-            - name: LOGFWD_DATAKIT_PORT
-              value: "9531"
-            - name: LOGFWD_ANNOTATION_DATAKIT_LOGS
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.annotations['datakit/log']
-            - name: LOGFWD_POD_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-            - name: LOGFWD_POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-          volumeMounts:
-            - mountPath: /var/log
-              name: varlog
-            - mountPath: /opt/logfwd/config
-              name: logfwd-config
-              subPath: config
+          - name: gateway-log
+            mountPath: /data/app/logs
 
       restartPolicy: Always
       volumes:
-      - name: varlog
-        emptyDir: { }
-      - configMap:
-          name: logfwd-conf
-        name: logfwd-config
-
-      
-
+      - name: gateway-log
+        hostPath:
+          path: /data/logs
+          type: DirectoryOrCreate

@@ -31,6 +31,15 @@ spec:
     metadata:
       labels:
         app: web-service
+      annotations:
+        datakit/logs: |
+          [
+            {
+              "disable": false,
+              "source": "$PREFIX-nginx",
+              "service": "$PREFIX-web"
+            }
+          ]
     spec:
       containers:
       - env:
@@ -49,7 +58,7 @@ spec:
         - name: ENV
           value: "$ENV"
         name: web-service
-        image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-web-service:v2.0
+        image: registry.cn-guangzhou.aliyuncs.com/guance-south/ruoyi-web-service:v2.5
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80

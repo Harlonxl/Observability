@@ -4,7 +4,7 @@
 ```shell
 ./deploy_ruoyi.sh \
     --applicationid=ruoyi_web \
-    --allowedtracingorigins="[['http://8.xx.xx.58:30000', 'http://8.xx.xx.26:30000']]" \
+    --allowedtracingorigins="['http://8.xx.xx.58:30000', 'http://8.xx.xx.26:30000']" \
     --datakittoken=tkn_5c73f03xxxxxx46cdeaceaf2 \
     --prefix=ruoyi \
     --logsource=ruoyi-log \
