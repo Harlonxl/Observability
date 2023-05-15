@@ -5,7 +5,7 @@
 ./deploy_ruoyi.sh \
     --applicationid=ruoyi_web \
     --allowedtracingorigins="['http://8.xx.xx.58:30000', 'http://8.xx.xx.26:30000']" \
-    --datakittoken=tkn_5c73f03xxxxxx46cdeaceaf2 \
+    --dataway=https://openway.guance.com?token=tkn_5cxxxxxxxf2 \
     --prefix=ruoyi \
     --logsource=ruoyi-log \
     --version=1.0 \

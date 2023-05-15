@@ -105,13 +105,17 @@ spec:
               apiVersion: v1
               fieldPath: spec.nodeName
         - name: ENV_DATAWAY
-          value: https://openway.guance.com?token=$DATAKIT_TOKEN
+          value: $DATAWAY
         - name: ENV_GLOBAL_TAGS
-          value: host=__datakit_hostname,host_ip=__datakit_ip
+          value: host=__datakit_hostname,host_ip=__datakit_ip,cluster_name_k8s=k8s-ruoyi
+        - name: ENV_GLOBAL_ELECTION_TAGS
+          value: cluster_name_k8s=k8s-ruoyi
         - name: ENV_DEFAULT_ENABLED_INPUTS
           value: cpu,disk,diskio,mem,swap,system,hostobject,net,host_processes,container,ebpf,rum,statsd,profile
         - name: ENV_ENABLE_ELECTION
           value: enable
+        - name: ENV_NAMESPACE
+          value: k8s-ruoyi
         - name: ENV_LOG
           value: stdout
         - name: ENV_HTTP_LISTEN
@@ -134,7 +138,7 @@ spec:
         - name: ENV_IPDB
           value: iploc
         # # ---iploc-end
-        image: pubrepo.jiagouyun.com/datakit/datakit:1.5.8
+        image: pubrepo.jiagouyun.com/datakit/datakit:1.6.0
         imagePullPolicy: Always
         name: datakit
         ports:

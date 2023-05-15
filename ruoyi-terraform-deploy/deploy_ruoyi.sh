@@ -2,7 +2,7 @@
 
 RUM_APPLICATION_ID=unset
 ALLOWED_TRACING_ORIGINS=unset
-DATAKIT_TOKEN=unset
+DATAWAY=unset
 PREFIX="ruoyi"
 LOG_SOURCE="ruoyi-log"
 VERSION="1.0"
@@ -11,12 +11,12 @@ ENV="prod"
 usage()
 {
   echo "Usage: deploy_ruoyi.sh [--applicationid] [--allowedtracingorigins] \
-    [--datakittoken] [--prefix=ruoyi] [--logsource=ruoyi-log] [--env=prod] [--version=1.0]"
+    [--dataway] [--prefix=ruoyi] [--logsource=ruoyi-log] [--env=prod] [--version=1.0]"
   exit 2
 }
 
 PARSED_ARGUMENTS=$(getopt -a -o i:a:t:p:s:v:e: --long \
-    applicationid:,datakitorigin:,allowedtracingorigins:,datakittoken:,prefix:,logsource:,version:,env: -- "$@")
+    applicationid:,datakitorigin:,allowedtracingorigins:,dataway:,prefix:,logsource:,version:,env: -- "$@")
 VALID_ARGUMENTS=$?
 if [ "$VALID_ARGUMENTS" != "0" ]; then
   usage
@@ -28,7 +28,7 @@ do
   case "$1" in
     -i | --applicationid) RUM_APPLICATION_ID="$2"; shift 2 ;;
     -a | --allowedtracingorigins) ALLOWED_TRACING_ORIGINS="$2"; shift 2 ;;
-    -t | --datakittoken) DATAKIT_TOKEN="$2"; shift 2 ;;
+    -t | --dataway) DATAWAY="$2"; shift 2 ;;
     -p | --prefix) PREFIX="$2"; shift 2 ;;
     -s | --logsource) LOG_SOURCE="$2"; shift 2 ;;
     -v | --version) VERSION="$2"; shift 2 ;;
@@ -39,14 +39,14 @@ do
 done
 
 if [[ "$RUM_APPLICATION_ID" == "unset" || "$DATAKIT_ORIGIN" == "unset" \
-      || "$ALLOWED_TRACING_ORIGINS" == "unset" || "$DATAKIT_TOKEN" == "unset" ]]; then
+      || "$ALLOWED_TRACING_ORIGINS" == "unset" || "$DATAWAY" == "unset" ]]; then
   usage
 fi
 
 echo "------------------------------"
 echo "applicationId : $RUM_APPLICATION_ID"
 echo "allowedTracingOrigins: $ALLOWED_TRACING_ORIGINS"
-echo "token: $DATAKIT_TOKEN"
+echo "dataway: $DATAWAY"
 echo "prefix: $PREFIX"
 echo "source: $LOG_SOURCE"
 echo "version: $VERSION"
@@ -73,6 +73,10 @@ while true; do
   kubectl apply -f ./deployment/datakit-operator.yaml
   sleep 10;
 done
+
+echo "---- start deploy metric server ----"
+kubectl apply -f ./deployment/components.yaml
+sleep 10
 
 echo "---- start deploy mysql ----"
 kubectl create ns ruoyi
